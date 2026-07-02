@@ -1,0 +1,25 @@
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
+from app.database import close_database_connection, connect_to_database
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Step 1: we will register Beanie document models here in the next steps.
+    await connect_to_database(document_models=[])
+    yield
+    await close_database_connection()
+
+
+app = FastAPI(
+    title="AI-Commerce API",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "service": "ai-commerce"}
