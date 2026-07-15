@@ -3,12 +3,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import close_database_connection, connect_to_database
-
+from app.models.user import User
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Step 1: we will register Beanie document models here in the next steps.
-    await connect_to_database(document_models=[])
+    await connect_to_database(document_models=[User])
     yield
     await close_database_connection()
 
