@@ -1,4 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
+from typing import List
+
+from app.models.user import Address
 
 # Input schema for user registration
 class UserRegisterRequest(BaseModel):
@@ -12,6 +15,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     full_name: str | None
     is_active: bool
+    addresses: List[Address] = [] 
 
     class Config:
         from_attributes = True

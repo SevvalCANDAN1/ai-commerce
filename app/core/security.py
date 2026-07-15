@@ -2,8 +2,11 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, status
+from jose import JWTError
+from bson import ObjectId
 
-
+from app.models.user import User
 from app.config import settings
 
 
@@ -37,3 +40,46 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     )
     
     return encoded_jwt
+
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """
+    Validates the JWT token, extracts the user ID, and fetches the user from the database.
+    Acts as the primary dependency for protected routes.
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        # 1. Decode the token using the secret key
+        payload = jwt.decode(
+            token, 
+            settings.jwt_secret_key, 
+            algorithms=[settings.jwt_algorithm]
+        )
+        
+        # 2. Extract user ID (subject claim)
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    # 3. Retrieve user from database
+    user = await User.get(ObjectId(user_id))
+    
+    if user is None:
+        raise credentials_exception
+        
+    return user
+async def get_current_superuser(current_user: User = Depends(get_current_user)) -> User:
+    """
+    Validates if the current authenticated user has superuser (admin) privileges.
+    """
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have enough privileges"
+        )
+    return current_user

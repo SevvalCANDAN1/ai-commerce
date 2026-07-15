@@ -3,10 +3,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
 
-from app.models.user import User
+from app.models.user import User, Address
 from app.schemas.user import UserRegisterRequest, UserResponse
 from app.schemas.token import Token
-from app.core.security import verify_password, create_access_token
+from app.core.security import verify_password, create_access_token, get_current_user
+
+
 
 # Setup bcrypt for password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -68,3 +70,36 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     
     return {"access_token": access_token, "token_type": "bearer"}
 
+@router.get("/me", response_model=UserResponse)
+async def get_my_profile(current_user: User = Depends(get_current_user)):
+    """
+    Get the currently logged-in user's profile.
+    Requires a valid JWT token.
+    """
+    # The get_current_user dependency already fetched the user from the DB!
+    # Pydantic's UserResponse will filter out the password automatically.
+    return UserResponse(
+        id=str(current_user.id),
+        email=current_user.email,
+        full_name=current_user.full_name,
+        is_active=current_user.is_active
+    )
+
+@router.post("/me/addresses", response_model=UserResponse)
+async def add_address(
+    new_address: Address, 
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Add a new address to the currently logged-in user's profile.
+    Demonstrates MongoDB's power of updating embedded documents.
+    """
+    current_user.addresses.append(new_address)
+    await current_user.save()
+    return UserResponse(
+        id=str(current_user.id),
+        email=current_user.email,
+        full_name=current_user.full_name,
+        is_active=current_user.is_active,
+        addresses=current_user.addresses 
+    )
