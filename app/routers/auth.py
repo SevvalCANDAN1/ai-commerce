@@ -1,8 +1,12 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
+
 
 from app.models.user import User
 from app.schemas.user import UserRegisterRequest, UserResponse
+from app.schemas.token import Token
+from app.core.security import verify_password, create_access_token
 
 # Setup bcrypt for password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -46,3 +50,21 @@ async def register(request: UserRegisterRequest):
         full_name=new_user.full_name,
         is_active=new_user.is_active
     )
+@router.post("/login", response_model=Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    Authenticate user and return a JWT access token.
+    Note: OAuth2 standard specifies 'username' as the field name, but we will pass the 'email' into it.
+    """
+    user = await User.find_one(User.email == form_data.username)
+    
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token = create_access_token(data={"sub": str(user.id)})
+    
+    return {"access_token": access_token, "token_type": "bearer"}
+
