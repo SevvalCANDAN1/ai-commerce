@@ -1,88 +1,148 @@
-from fastapi import APIRouter, status, Depends
-from app.models.user import User
-from app.models.product import Product
-from app.schemas.product import ProductCreateRequest, ProductResponse
-from app.core.security import get_current_superuser
 from typing import List
+
+from bson import ObjectId
+from bson.errors import InvalidId
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from app.core.security import get_current_superuser
+from app.models.product import Product
+from app.models.user import User
+from app.schemas.product import (
+    ProductCreateRequest,
+    ProductResponse,
+    ProductUpdateRequest,
+    calculate_total_stock,
+    product_to_response,
+)
 
 router = APIRouter(
     prefix="/products",
-    tags=["Products"]
+    tags=["Products"],
 )
+
+ALLOWED_PRODUCT_STATUSES = {"draft", "published", "deleted"}
+
+
+def is_storefront_visible(product: Product) -> bool:
+    """Returns True when a product should appear on the public storefront."""
+    return product.status == "published" and product.total_stock > 0
+
+
+async def get_product_or_404(product_id: str) -> Product:
+    """Fetches a product by ID or raises 404 for invalid/missing IDs."""
+    try:
+        product = await Product.get(ObjectId(product_id))
+    except InvalidId:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found",
+        )
+
+    if product is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found",
+        )
+
+    return product
+
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=ProductResponse)
 async def create_product(
-    request: ProductCreateRequest, 
-    current_admin: User = Depends(get_current_superuser)
+    request: ProductCreateRequest,
+    current_admin: User = Depends(get_current_superuser),
 ):
-    """
-    Create a new product.
-    Only accessible by superusers (admins).
-    Calculates total stock automatically from variants.
-    """
-    # 1. Calculate total stock by summing up variant stocks
-    calculated_total_stock = 0
-    for variant in request.variants:
-        calculated_total_stock += variant.stock
-
-    # 2. Create the Product document object to be saved
+    """Create a new product. Only accessible by superusers."""
     new_product = Product(
         name=request.name,
         description=request.description,
         base_price=request.base_price,
         categories=request.categories,
         variants=request.variants,
-        status="published", # New products are published by default
-        total_stock=calculated_total_stock # Override with our calculated stock
+        status="published",
+        total_stock=calculate_total_stock(request.variants),
     )
-
-    # 3. Save to database
     await new_product.insert()
 
-    # 4. Return the response to the client
-    return ProductResponse(
-        id=str(new_product.id),
-        name=new_product.name,
-        description=new_product.description,
-        base_price=new_product.base_price,
-        categories=new_product.categories,
-        variants=new_product.variants,
-        status=new_product.status,
-        total_stock=new_product.total_stock
-    )
+    return product_to_response(new_product)
+
 
 @router.get("/", response_model=List[ProductResponse])
 async def list_products(
-    skip: int = 0, 
-    limit: int = 20
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    category: str | None = Query(default=None, min_length=1),
 ):
     """
     Public endpoint to list products (Storefront).
-    Implements Smart Visibility:
-    - Only shows products that are "published"
-    - Only shows products that have total_stock > 0
-    Implements pagination using skip and limit.
+    Only returns published products with available stock.
     """
-    
-    raw_products = await Product.find(
+    filters = [
         Product.status == "published",
-        Product.total_stock > 0
-    ).skip(skip).limit(limit).to_list()
-    
+        Product.total_stock > 0,
+    ]
 
-    formatted_products = []
-    for p in raw_products:
-        formatted_products.append(
-            ProductResponse(
-                id=str(p.id),
-                name=p.name,
-                description=p.description,
-                base_price=p.base_price,
-                categories=p.categories,
-                variants=p.variants,
-                status=p.status,
-                total_stock=p.total_stock
-            )
+    if category:
+        filters.append(Product.categories == category)
+
+    products = await Product.find(*filters).skip(skip).limit(limit).to_list()
+    return [product_to_response(product) for product in products]
+
+
+@router.get("/{product_id}", response_model=ProductResponse)
+async def get_product(product_id: str):
+    """Public endpoint to fetch a single visible product by ID."""
+    product = await get_product_or_404(product_id)
+
+    if not is_storefront_visible(product):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found",
         )
 
-    return formatted_products
+    return product_to_response(product)
+
+
+@router.put("/{product_id}", response_model=ProductResponse)
+async def update_product(
+    product_id: str,
+    request: ProductUpdateRequest,
+    current_admin: User = Depends(get_current_superuser),
+):
+    """Update an existing product. Only accessible by superusers."""
+    product = await get_product_or_404(product_id)
+    update_data = request.model_dump(exclude_unset=True)
+
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No fields provided for update",
+        )
+
+    if "status" in update_data and update_data["status"] not in ALLOWED_PRODUCT_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Status must be one of: {', '.join(sorted(ALLOWED_PRODUCT_STATUSES))}",
+        )
+
+    if "variants" in update_data:
+        update_data["total_stock"] = calculate_total_stock(update_data["variants"])
+
+    for field, value in update_data.items():
+        setattr(product, field, value)
+
+    await product.save()
+    return product_to_response(product)
+
+
+@router.delete("/{product_id}", response_model=ProductResponse)
+async def delete_product(
+    product_id: str,
+    current_admin: User = Depends(get_current_superuser),
+):
+    """Soft-delete a product by setting its status to deleted."""
+    product = await get_product_or_404(product_id)
+    product.status = "deleted"
+    await product.save()
+
+    return product_to_response(product)
