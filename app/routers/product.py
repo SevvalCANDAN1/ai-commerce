@@ -4,7 +4,7 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.core.security import get_current_superuser
+from app.core.security import get_current_store_admin
 from app.models.product import Product
 from app.models.user import User
 from app.schemas.product import (
@@ -50,7 +50,7 @@ async def get_product_or_404(product_id: str) -> Product:
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=ProductResponse)
 async def create_product(
     request: ProductCreateRequest,
-    current_admin: User = Depends(get_current_superuser),
+    current_admin: User = Depends(get_current_store_admin),
 ):
     """Create a new product. Only accessible by superusers."""
     new_product = Product(
@@ -107,7 +107,7 @@ async def get_product(product_id: str):
 async def update_product(
     product_id: str,
     request: ProductUpdateRequest,
-    current_admin: User = Depends(get_current_superuser),
+    current_admin: User = Depends(get_current_store_admin),
 ):
     """Update an existing product. Only accessible by superusers."""
     product = await get_product_or_404(product_id)
@@ -138,7 +138,7 @@ async def update_product(
 @router.delete("/{product_id}", response_model=ProductResponse)
 async def delete_product(
     product_id: str,
-    current_admin: User = Depends(get_current_superuser),
+    current_admin: User = Depends(get_current_store_admin),
 ):
     """Soft-delete a product by setting its status to deleted."""
     product = await get_product_or_404(product_id)

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import List
 
-from app.models.user import Address
+from app.models.user import Address, UserRole
 
 # Input schema for user registration
 class UserRegisterRequest(BaseModel):
@@ -14,6 +14,7 @@ class UserResponse(BaseModel):
     id: str  # MongoDB ObjectId will be converted to string
     email: EmailStr
     full_name: str | None
+    role: UserRole
     is_active: bool
     addresses: List[Address] = [] 
 

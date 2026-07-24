@@ -5,15 +5,15 @@ from fastapi import FastAPI
 from app.database import close_database_connection, connect_to_database
 
 
-from app.models.user import User
-from app.routers import auth
 from app.models.product import Product
-from app.routers import product
+from app.models.refresh_token import RefreshToken
+from app.models.user import User
+from app.routers import auth, product
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Step 1: we will register Beanie document models here in the next steps.
-    await connect_to_database(document_models=[User, Product])
+    await connect_to_database(document_models=[User, Product, RefreshToken])
     yield
     await close_database_connection()
 

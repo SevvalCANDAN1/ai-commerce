@@ -1,17 +1,16 @@
-from datetime import timedelta
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.config import settings
 from app.core.security import (
-    create_access_token,
     get_current_user,
     hash_password,
+    issue_token_pair,
+    revoke_refresh_token,
+    validate_refresh_token,
     verify_password,
 )
 from app.models.user import Address, User
-from app.schemas.token import Token
+from app.schemas.token import RefreshTokenRequest, Token
 from app.schemas.user import UserRegisterRequest, UserResponse
 
 router = APIRouter(
@@ -41,6 +40,7 @@ async def register(request: UserRegisterRequest):
         id=str(new_user.id),
         email=new_user.email,
         full_name=new_user.full_name,
+        role=new_user.role,
         is_active=new_user.is_active,
     )
 
@@ -48,7 +48,7 @@ async def register(request: UserRegisterRequest):
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
-    Authenticate user and return a JWT access token.
+    Authenticate user and return access + refresh tokens.
     OAuth2 uses 'username' as the field name; pass the user's email there.
     """
     user = await User.find_one(User.email == form_data.username)
@@ -66,12 +66,34 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Account is inactive",
         )
 
-    access_token = create_access_token(
-        data={"sub": str(user.id)},
-        expires_delta=timedelta(minutes=settings.access_token_expire_minutes),
-    )
+    access_token, refresh_token = await issue_token_pair(user)
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
+
+
+@router.post("/refresh", response_model=Token)
+async def refresh_tokens(request: RefreshTokenRequest):
+    """Exchange a valid refresh token for a new access + refresh token pair."""
+    user = await validate_refresh_token(request.refresh_token)
+    await revoke_refresh_token(request.refresh_token)
+
+    access_token, refresh_token = await issue_token_pair(user)
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(request: RefreshTokenRequest):
+    """Revoke a refresh token so it can no longer be used."""
+    await revoke_refresh_token(request.refresh_token)
 
 
 @router.get("/me", response_model=UserResponse)
@@ -81,6 +103,7 @@ async def get_my_profile(current_user: User = Depends(get_current_user)):
         id=str(current_user.id),
         email=current_user.email,
         full_name=current_user.full_name,
+        role=current_user.role,
         is_active=current_user.is_active,
         addresses=current_user.addresses,
     )
@@ -99,6 +122,7 @@ async def add_address(
         id=str(current_user.id),
         email=current_user.email,
         full_name=current_user.full_name,
+        role=current_user.role,
         is_active=current_user.is_active,
         addresses=current_user.addresses,
     )

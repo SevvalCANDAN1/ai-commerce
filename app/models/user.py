@@ -1,26 +1,31 @@
-from typing import Optional, List
+from enum import StrEnum
+from typing import List, Optional
+
 from beanie import Document
 from pydantic import BaseModel, EmailStr
 
+
+class UserRole(StrEnum):
+    CUSTOMER = "customer"
+    STORE_ADMIN = "store_admin"
+
+
 class Address(BaseModel):
-    """
-    Embedded document for user addresses.
-    Instead of a separate collection, we store addresses directly inside the User document.
-    """
-    title: str       # e.g., "Home", "Office"
+    """Embedded document for user addresses."""
+
+    title: str
     city: str
     country: str
     full_address: str
     zip_code: Optional[str] = None
 
+
 class User(Document):
     email: EmailStr
     hashed_password: str
     full_name: Optional[str] = None
+    role: UserRole = UserRole.CUSTOMER
     is_active: bool = True
-    is_superuser: bool = False
-    
-    # Embedded list of addresses
     addresses: List[Address] = []
 
     class Settings:
