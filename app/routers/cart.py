@@ -1,12 +1,13 @@
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.security import get_current_user
+from app.core.storefront import is_storefront_visible
 from app.models.cart import Cart, CartItem
 from app.models.product import Product, Variant
 from app.models.user import User
-from app.routers.product import get_product_or_404, is_storefront_visible
+from app.routers.product import get_product_or_404
 from app.schemas.cart import (
     CartItemAddRequest,
     CartItemRemoveRequest,
@@ -14,6 +15,7 @@ from app.schemas.cart import (
     CartLineResponse,
     CartResponse,
 )
+from app.services.pricing_service import calculate_cart_pricing, get_unit_price
 
 router = APIRouter(
     prefix="/cart",
@@ -30,13 +32,6 @@ def get_variant_or_404(product: Product, variant_sku: str) -> Variant:
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Variant not found",
     )
-
-
-def get_unit_price(product: Product, variant: Variant) -> float:
-    """Calculates unit price from the database (never trust client prices)."""
-    if variant.price_override is not None:
-        return variant.price_override
-    return product.base_price
 
 
 async def get_or_create_cart(user: User) -> Cart:
@@ -67,7 +62,7 @@ async def validate_cart_product(product_id: str) -> Product:
     return product
 
 
-async def build_cart_response(cart: Cart) -> CartResponse:
+async def build_cart_response(cart: Cart, coupon_code: str | None = None) -> CartResponse:
     """Builds API response with live prices and totals from the product catalog."""
     lines: list[CartLineResponse] = []
     subtotal = 0.0
@@ -99,24 +94,34 @@ async def build_cart_response(cart: Cart) -> CartResponse:
             )
         )
 
+    pricing = calculate_cart_pricing(subtotal=subtotal, coupon_code=coupon_code)
+
     return CartResponse(
         id=str(cart.id),
         items=lines,
         item_count=item_count,
-        subtotal=subtotal,
+        subtotal=pricing.subtotal,
+        tax_amount=pricing.tax_amount,
+        shipping_amount=pricing.shipping_amount,
+        discount_amount=pricing.discount_amount,
+        grand_total=pricing.grand_total,
     )
 
 
 @router.get("/", response_model=CartResponse)
-async def get_cart(current_user: User = Depends(get_current_user)):
+async def get_cart(
+    coupon: str | None = Query(default=None, min_length=1),
+    current_user: User = Depends(get_current_user),
+):
     """Return the current user's cart with prices calculated from the database."""
     cart = await get_or_create_cart(current_user)
-    return await build_cart_response(cart)
+    return await build_cart_response(cart, coupon_code=coupon)
 
 
 @router.post("/items", response_model=CartResponse, status_code=status.HTTP_201_CREATED)
 async def add_cart_item(
     request: CartItemAddRequest,
+    coupon: str | None = Query(default=None, min_length=1),
     current_user: User = Depends(get_current_user),
 ):
     """Add a product variant to the cart or increase quantity if it already exists."""
@@ -157,12 +162,13 @@ async def add_cart_item(
         )
 
     await cart.save()
-    return await build_cart_response(cart)
+    return await build_cart_response(cart, coupon_code=coupon)
 
 
 @router.put("/items", response_model=CartResponse)
 async def update_cart_item(
     request: CartItemUpdateRequest,
+    coupon: str | None = Query(default=None, min_length=1),
     current_user: User = Depends(get_current_user),
 ):
     """Update quantity for an existing cart line."""
@@ -193,12 +199,13 @@ async def update_cart_item(
 
     cart.items[existing_index].quantity = request.quantity
     await cart.save()
-    return await build_cart_response(cart)
+    return await build_cart_response(cart, coupon_code=coupon)
 
 
 @router.delete("/items", response_model=CartResponse)
 async def remove_cart_item(
     request: CartItemRemoveRequest,
+    coupon: str | None = Query(default=None, min_length=1),
     current_user: User = Depends(get_current_user),
 ):
     """Remove a product variant from the cart."""
@@ -220,4 +227,4 @@ async def remove_cart_item(
 
     cart.items.pop(existing_index)
     await cart.save()
-    return await build_cart_response(cart)
+    return await build_cart_response(cart, coupon_code=coupon)

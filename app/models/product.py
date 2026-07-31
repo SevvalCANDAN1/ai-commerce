@@ -1,6 +1,9 @@
 from typing import List
+
 from beanie import Document
 from pydantic import BaseModel, Field
+from pymongo import IndexModel
+
 
 class Variant(BaseModel):
     """
@@ -34,3 +37,6 @@ class Product(Document):
 
     class Settings:
         name = "products"
+        indexes = [
+            IndexModel([("status", 1), ("total_stock", 1)], name="storefront_visibility_idx"),
+        ]

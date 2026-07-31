@@ -42,3 +42,7 @@ class CartResponse(BaseModel):
     items: list[CartLineResponse]
     item_count: int
     subtotal: float
+    tax_amount: float
+    shipping_amount: float
+    discount_amount: float
+    grand_total: float

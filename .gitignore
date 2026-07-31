@@ -9,3 +9,19 @@ __pycache__/
 .ruff_cache/
 .idea/
 .vscode/
+
+# ML data, notebooks & artifacts
+ml/data/raw/*
+!ml/data/raw/.gitkeep
+ml/data/processed/*
+!ml/data/processed/.gitkeep
+ml/models/*
+!ml/models/.gitkeep
+ml/notebooks/*
+!ml/notebooks/.gitkeep
+*.ipynb
+*.pt
+*.pth
+*.pkl
+*.joblib
+.ipynb_checkpoints/

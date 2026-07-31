@@ -5,6 +5,7 @@ from bson.errors import InvalidId
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.security import get_current_store_admin
+from app.core.storefront import is_storefront_visible, storefront_filters
 from app.models.product import Product
 from app.models.user import User
 from app.schemas.product import (
@@ -21,11 +22,6 @@ router = APIRouter(
 )
 
 ALLOWED_PRODUCT_STATUSES = {"draft", "published", "deleted"}
-
-
-def is_storefront_visible(product: Product) -> bool:
-    """Returns True when a product should appear on the public storefront."""
-    return product.status == "published" and product.total_stock > 0
 
 
 async def get_product_or_404(product_id: str) -> Product:
@@ -77,13 +73,7 @@ async def list_products(
     Public endpoint to list products (Storefront).
     Only returns published products with available stock.
     """
-    filters = [
-        Product.status == "published",
-        Product.total_stock > 0,
-    ]
-
-    if category:
-        filters.append(Product.categories == category)
+    filters = storefront_filters(category=category)
 
     products = await Product.find(*filters).skip(skip).limit(limit).to_list()
     return [product_to_response(product) for product in products]

@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
 
+    # Cart pricing (Modül 1 §3.3)
+    tax_rate: float = 0.20
+    free_shipping_threshold: float = 500.0
+    shipping_flat_rate: float = 29.99
+
     @cached_property
     def mongodb_url(self) -> str:
         username = quote_plus(self.mongo_root_username)
