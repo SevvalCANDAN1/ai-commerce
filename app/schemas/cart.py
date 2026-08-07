@@ -17,6 +17,12 @@ class CartItemUpdateRequest(BaseModel):
     quantity: int = Field(..., ge=1)
 
 
+class CartMergeRequest(BaseModel):
+    """Merge a guest cart into the authenticated user's cart."""
+
+    guest_id: str = Field(..., min_length=1)
+
+
 class CartItemRemoveRequest(BaseModel):
     """Request body for removing a line from the cart."""
 
@@ -39,6 +45,7 @@ class CartResponse(BaseModel):
     """Full cart summary for the authenticated user."""
 
     id: str
+    guest_id: str | None = None
     items: list[CartLineResponse]
     item_count: int
     subtotal: float

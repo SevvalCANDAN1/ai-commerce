@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core.security import (
@@ -12,6 +12,7 @@ from app.core.security import (
 from app.models.user import Address, User
 from app.schemas.token import RefreshTokenRequest, Token
 from app.schemas.user import UserRegisterRequest, UserResponse
+from app.services.cart_service import merge_guest_cart_into_user
 
 router = APIRouter(
     prefix="/auth",
@@ -46,7 +47,10 @@ async def register(request: UserRegisterRequest):
 
 
 @router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    x_guest_id: str | None = Header(default=None, alias="X-Guest-Id"),
+):
     """
     Authenticate user and return access + refresh tokens.
     OAuth2 uses 'username' as the field name; pass the user's email there.
@@ -67,6 +71,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         )
 
     access_token, refresh_token = await issue_token_pair(user)
+
+    if x_guest_id:
+        await merge_guest_cart_into_user(user, x_guest_id)
 
     return {
         "access_token": access_token,

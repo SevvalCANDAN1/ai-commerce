@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     free_shipping_threshold: float = 500.0
     shipping_flat_rate: float = 29.99
 
+    # Checkout & payment (Modül 1 §4)
+    stock_reservation_minutes: int = 5
+    checkout_session_minutes: int = 15
+    mock_payment_failure_rate: float = 0.20
+
     @cached_property
     def mongodb_url(self) -> str:
         username = quote_plus(self.mongo_root_username)

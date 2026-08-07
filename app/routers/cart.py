@@ -2,20 +2,25 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from app.core.deps import CartOwner, resolve_cart_owner
 from app.core.security import get_current_user
-from app.core.storefront import is_storefront_visible
-from app.models.cart import Cart, CartItem
-from app.models.product import Product, Variant
+from app.models.cart import CartItem
 from app.models.user import User
-from app.routers.product import get_product_or_404
 from app.schemas.cart import (
     CartItemAddRequest,
     CartItemRemoveRequest,
     CartItemUpdateRequest,
-    CartLineResponse,
+    CartMergeRequest,
     CartResponse,
 )
-from app.services.pricing_service import calculate_cart_pricing, get_unit_price
+from app.services.cart_service import (
+    build_cart_response,
+    find_cart_item_index,
+    get_or_create_cart_for_owner,
+    get_variant_or_404,
+    merge_guest_cart_into_user,
+    validate_cart_product,
+)
 
 router = APIRouter(
     prefix="/cart",
@@ -23,106 +28,31 @@ router = APIRouter(
 )
 
 
-def get_variant_or_404(product: Product, variant_sku: str) -> Variant:
-    """Finds a variant by SKU or raises 404."""
-    for variant in product.variants:
-        if variant.sku == variant_sku:
-            return variant
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Variant not found",
-    )
-
-
-async def get_or_create_cart(user: User) -> Cart:
-    """Returns the user's cart, creating an empty one if needed."""
-    cart = await Cart.find_one(Cart.user_id == user.id)
-    if cart is None:
-        cart = Cart(user_id=user.id, items=[])
-        await cart.insert()
-    return cart
-
-
-def find_cart_item_index(cart: Cart, product_id: ObjectId, variant_sku: str) -> int | None:
-    """Returns the index of a matching cart line, or None if not found."""
-    for index, item in enumerate(cart.items):
-        if item.product_id == product_id and item.variant_sku == variant_sku:
-            return index
-    return None
-
-
-async def validate_cart_product(product_id: str) -> Product:
-    """Loads a product and ensures it can be purchased on the storefront."""
-    product = await get_product_or_404(product_id)
-    if not is_storefront_visible(product):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found",
-        )
-    return product
-
-
-async def build_cart_response(cart: Cart, coupon_code: str | None = None) -> CartResponse:
-    """Builds API response with live prices and totals from the product catalog."""
-    lines: list[CartLineResponse] = []
-    subtotal = 0.0
-    item_count = 0
-
-    for item in cart.items:
-        product = await Product.get(item.product_id)
-        if product is None or not is_storefront_visible(product):
-            continue
-
-        try:
-            variant = get_variant_or_404(product, item.variant_sku)
-        except HTTPException:
-            continue
-
-        unit_price = get_unit_price(product, variant)
-        line_total = unit_price * item.quantity
-        subtotal += line_total
-        item_count += item.quantity
-
-        lines.append(
-            CartLineResponse(
-                product_id=str(item.product_id),
-                variant_sku=item.variant_sku,
-                product_name=product.name,
-                quantity=item.quantity,
-                unit_price=unit_price,
-                line_total=line_total,
-            )
-        )
-
-    pricing = calculate_cart_pricing(subtotal=subtotal, coupon_code=coupon_code)
-
-    return CartResponse(
-        id=str(cart.id),
-        items=lines,
-        item_count=item_count,
-        subtotal=pricing.subtotal,
-        tax_amount=pricing.tax_amount,
-        shipping_amount=pricing.shipping_amount,
-        discount_amount=pricing.discount_amount,
-        grand_total=pricing.grand_total,
-    )
-
-
 @router.get("/", response_model=CartResponse)
 async def get_cart(
     coupon: str | None = Query(default=None, min_length=1),
+    owner: CartOwner = Depends(resolve_cart_owner),
+):
+    """Return the current cart (authenticated user or guest via X-Guest-Id)."""
+    cart = await get_or_create_cart_for_owner(owner)
+    return await build_cart_response(cart, coupon_code=coupon)
+
+
+@router.post("/merge", response_model=CartResponse)
+async def merge_cart(
+    request: CartMergeRequest,
     current_user: User = Depends(get_current_user),
 ):
-    """Return the current user's cart with prices calculated from the database."""
-    cart = await get_or_create_cart(current_user)
-    return await build_cart_response(cart, coupon_code=coupon)
+    """Merge a guest cart into the authenticated user's cart after login."""
+    cart = await merge_guest_cart_into_user(current_user, request.guest_id)
+    return await build_cart_response(cart)
 
 
 @router.post("/items", response_model=CartResponse, status_code=status.HTTP_201_CREATED)
 async def add_cart_item(
     request: CartItemAddRequest,
     coupon: str | None = Query(default=None, min_length=1),
-    current_user: User = Depends(get_current_user),
+    owner: CartOwner = Depends(resolve_cart_owner),
 ):
     """Add a product variant to the cart or increase quantity if it already exists."""
     product = await validate_cart_product(request.product_id)
@@ -136,7 +66,7 @@ async def add_cart_item(
             detail="Product not found",
         )
 
-    cart = await get_or_create_cart(current_user)
+    cart = await get_or_create_cart_for_owner(owner)
     existing_index = find_cart_item_index(cart, product_object_id, request.variant_sku)
     new_quantity = (
         cart.items[existing_index].quantity + request.quantity
@@ -169,7 +99,7 @@ async def add_cart_item(
 async def update_cart_item(
     request: CartItemUpdateRequest,
     coupon: str | None = Query(default=None, min_length=1),
-    current_user: User = Depends(get_current_user),
+    owner: CartOwner = Depends(resolve_cart_owner),
 ):
     """Update quantity for an existing cart line."""
     product = await validate_cart_product(request.product_id)
@@ -183,7 +113,7 @@ async def update_cart_item(
             detail="Product not found",
         )
 
-    cart = await get_or_create_cart(current_user)
+    cart = await get_or_create_cart_for_owner(owner)
     existing_index = find_cart_item_index(cart, product_object_id, request.variant_sku)
     if existing_index is None:
         raise HTTPException(
@@ -206,7 +136,7 @@ async def update_cart_item(
 async def remove_cart_item(
     request: CartItemRemoveRequest,
     coupon: str | None = Query(default=None, min_length=1),
-    current_user: User = Depends(get_current_user),
+    owner: CartOwner = Depends(resolve_cart_owner),
 ):
     """Remove a product variant from the cart."""
     try:
@@ -217,7 +147,7 @@ async def remove_cart_item(
             detail="Product not found",
         )
 
-    cart = await get_or_create_cart(current_user)
+    cart = await get_or_create_cart_for_owner(owner)
     existing_index = find_cart_item_index(cart, product_object_id, request.variant_sku)
     if existing_index is None:
         raise HTTPException(
