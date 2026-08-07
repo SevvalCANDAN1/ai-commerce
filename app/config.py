@@ -1,7 +1,7 @@
 from functools import cached_property
 from urllib.parse import quote_plus
 
-from pydantic import Field
+from pydantic import Field, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -33,6 +33,21 @@ class Settings(BaseSettings):
     stock_reservation_minutes: int = 5
     checkout_session_minutes: int = 15
     mock_payment_failure_rate: float = 0.20
+
+    # Smart search (Modül 2)
+    azure_openai_endpoint: str | None = None
+    azure_openai_api_key: str | None = None
+    azure_openai_embedding_deployment: str = "text-embedding-3-small"
+    azure_openai_api_version: str = "2024-02-01"
+    embedding_dimensions: int = 1536
+    search_top_k: int = 5
+    search_vector_index_name: str = "product_vector_index"
+    azure_openai_timeout_seconds: float = 10.0
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def azure_openai_enabled(self) -> bool:
+        return bool(self.azure_openai_endpoint and self.azure_openai_api_key)
 
     @cached_property
     def mongodb_url(self) -> str:

@@ -35,8 +35,15 @@ class Product(Document):
     # Automatically calculated sum of all variant stocks
     total_stock: int = Field(default=0, ge=0)
 
+    # Modül 2: semantic search vector (1536-dim from Azure OpenAI)
+    embedding: list[float] | None = None
+
     class Settings:
         name = "products"
         indexes = [
             IndexModel([("status", 1), ("total_stock", 1)], name="storefront_visibility_idx"),
+            IndexModel(
+                [("name", "text"), ("description", "text"), ("categories", "text")],
+                name="product_text_idx",
+            ),
         ]

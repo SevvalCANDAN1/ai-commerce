@@ -10,7 +10,7 @@ from app.models.order import Order
 from app.models.product import Product
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
-from app.routers import auth, cart, checkout, order, payment, product
+from app.routers import auth, cart, checkout, order, payment, product, search
 from app.services.order_handlers import register_order_handlers
 
 
@@ -44,6 +44,7 @@ app.include_router(cart.router, prefix="/api/v1")
 app.include_router(checkout.router, prefix="/api/v1")
 app.include_router(payment.router, prefix="/api/v1")
 app.include_router(order.router, prefix="/api/v1")
+app.include_router(search.router, prefix="/api/v1")
 
 
 @app.get("/health")

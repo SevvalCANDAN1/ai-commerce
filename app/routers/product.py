@@ -15,6 +15,7 @@ from app.schemas.product import (
     calculate_total_stock,
     product_to_response,
 )
+from app.services.embedding_service import refresh_product_embedding
 
 router = APIRouter(
     prefix="/products",
@@ -59,6 +60,7 @@ async def create_product(
         total_stock=calculate_total_stock(request.variants),
     )
     await new_product.insert()
+    await refresh_product_embedding(new_product)
 
     return product_to_response(new_product)
 
@@ -122,6 +124,7 @@ async def update_product(
         setattr(product, field, value)
 
     await product.save()
+    await refresh_product_embedding(product)
     return product_to_response(product)
 
 
