@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     mongo_port: int = 27017
     mongo_database: str = "ai_commerce"
     mongo_auth_source: str = "admin"
+    # Optional full URI (Atlas mongodb+srv://...). Overrides host/port construction.
+    mongodb_uri: str | None = None
 
     jwt_secret_key: str = Field(min_length=32)
     jwt_algorithm: str = "HS256"
@@ -51,6 +53,8 @@ class Settings(BaseSettings):
 
     @cached_property
     def mongodb_url(self) -> str:
+        if self.mongodb_uri:
+            return self.mongodb_uri
         username = quote_plus(self.mongo_root_username)
         password = quote_plus(self.mongo_root_password)
         return (
