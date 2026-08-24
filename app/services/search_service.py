@@ -14,6 +14,17 @@ from app.services.embedding_service import embed_text
 logger = logging.getLogger(__name__)
 
 
+def _cosine(a: list[float], b: list[float]) -> float:
+    if not a or not b or len(a) != len(b):
+        return 0.0
+    dot = sum(x * y for x, y in zip(a, b))
+    na = sum(x * x for x in a) ** 0.5
+    nb = sum(y * y for y in b) ** 0.5
+    if na == 0 or nb == 0:
+        return 0.0
+    return dot / (na * nb)
+
+
 async def _vector_search(query_vector: list[float], top_k: int) -> list[tuple[Product, float]]:
     client = get_mongo_client()
     collection = client[settings.mongo_database][Product.Settings.name]
@@ -51,6 +62,24 @@ async def _vector_search(query_vector: list[float], top_k: int) -> list[tuple[Pr
     return results
 
 
+async def _local_vector_scan(
+    query_vector: list[float], top_k: int
+) -> list[tuple[Product, float]]:
+    """Cosine scan when Atlas $vectorSearch is unavailable (local mongo:7)."""
+    products = await Product.find(
+        Product.status == "published",
+        Product.total_stock > 0,
+        Product.embedding != None,  # noqa: E711
+    ).to_list()
+    scored = [
+        (product, _cosine(query_vector, product.embedding or []))
+        for product in products
+        if is_storefront_visible(product)
+    ]
+    scored.sort(key=lambda item: item[1], reverse=True)
+    return [(product, score) for product, score in scored[:top_k] if score > 0]
+
+
 async def _keyword_search(query: str, top_k: int) -> list[Product]:
     """Traditional keyword search used as fallback when embeddings/vector search fail."""
     words = [word for word in re.split(r"\s+", query.strip()) if len(word) >= 2]
@@ -85,23 +114,28 @@ async def smart_search(query: str, top_k: int | None = None) -> SearchResponse:
 
     query_vector = await embed_text(query)
     if query_vector is not None:
+        semantic_hits: list[tuple[Product, float]] = []
         try:
             semantic_hits = await _vector_search(query_vector, limit)
-            if semantic_hits:
-                return SearchResponse(
-                    query=query,
-                    mode="semantic",
-                    results=[
-                        SearchResultItem(
-                            product=product_to_response(product),
-                            score=score,
-                        )
-                        for product, score in semantic_hits
-                    ],
-                    total=len(semantic_hits),
-                )
         except Exception as exc:
-            logger.warning("Vector search unavailable, using keyword fallback: %s", exc)
+            logger.warning("Atlas vector search unavailable, using local cosine scan: %s", exc)
+
+        if not semantic_hits:
+            semantic_hits = await _local_vector_scan(query_vector, limit)
+
+        if semantic_hits:
+            return SearchResponse(
+                query=query,
+                mode="semantic",
+                results=[
+                    SearchResultItem(
+                        product=product_to_response(product),
+                        score=score,
+                    )
+                    for product, score in semantic_hits
+                ],
+                total=len(semantic_hits),
+            )
 
     keyword_hits = await _keyword_search(query, limit)
     return SearchResponse(
