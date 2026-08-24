@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.config import settings
 from app.database import close_database_connection, connect_to_database
 from app.models.cart import Cart
 from app.models.checkout_session import CheckoutSession
@@ -10,7 +11,8 @@ from app.models.order import Order
 from app.models.product import Product
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
-from app.routers import auth, cart, checkout, order, payment, product, search
+from app.routers import auth, cart, checkout, forecast, order, payment, product, search
+from app.services.forecast_service import forecast_ready
 from app.services.order_handlers import register_order_handlers
 
 
@@ -45,8 +47,14 @@ app.include_router(checkout.router, prefix="/api/v1")
 app.include_router(payment.router, prefix="/api/v1")
 app.include_router(order.router, prefix="/api/v1")
 app.include_router(search.router, prefix="/api/v1")
+app.include_router(forecast.router, prefix="/api/v1")
 
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "service": "ai-commerce"}
+    return {
+        "status": "ok",
+        "service": "ai-commerce",
+        "azure_openai": settings.azure_openai_enabled,
+        "demand_forecast": forecast_ready(),
+    }
