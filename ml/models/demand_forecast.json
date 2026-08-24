@@ -1,0 +1,1304 @@
+{
+  "metrics": {
+    "source": "olist",
+    "n_train": 1271,
+    "n_valid": 177,
+    "n_categories": 15,
+    "mae": 27.104,
+    "mape": 0.374,
+    "horizon_weeks": 8,
+    "trained_at": "2026-08-23T11:08:50.879737+00:00"
+  },
+  "categories": {
+    "auto": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 59.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 74.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 66.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 58.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 64.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 96.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 91.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 110.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 135.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 101.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 45.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 2.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 28.36
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 47.09
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 38.88
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 36.45
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 37.58
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 44.95
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 41.12
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 34.6
+        }
+      ]
+    },
+    "baby": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 63.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 41.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 46.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 43.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 33.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 51.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 73.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 86.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 58.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 51.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 27.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 1.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 14.6
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 24.84
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 23.61
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 22.47
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 23.81
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 29.1
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 32.31
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 28.98
+        }
+      ]
+    },
+    "bed_bath_table": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 186.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 174.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 159.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 120.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 87.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 189.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 157.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 193.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 207.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 197.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 86.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 5.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 69.73
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 89.53
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 81.84
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 68.84
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 75.64
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 72.81
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 76.2
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 68.79
+        }
+      ]
+    },
+    "computers_accessories": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 76.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 118.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 90.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 71.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 77.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 112.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 112.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 155.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 115.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 120.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 50.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 4.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 26.91
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 35.44
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 43.3
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 35.76
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 40.17
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 39.17
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 45.94
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 36.82
+        }
+      ]
+    },
+    "cool_stuff": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 16.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 27.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 33.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 25.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 24.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 30.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 25.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 43.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 38.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 29.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 17.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 1.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 11.15
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 14.47
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 15.18
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 16.98
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 17.79
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 19.1
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 17.97
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 14.7
+        }
+      ]
+    },
+    "electronics": {
+      "history": [
+        {
+          "week": "2018-06-05",
+          "units": 48.0
+        },
+        {
+          "week": "2018-06-12",
+          "units": 40.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 58.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 40.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 20.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 31.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 48.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 34.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 41.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 44.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 26.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 14.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-08-28",
+          "predicted_units": 29.21
+        },
+        {
+          "week": "2018-09-04",
+          "predicted_units": 39.09
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 35.42
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 31.91
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 33.06
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 36.19
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 37.96
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 36.79
+        }
+      ]
+    },
+    "furniture_decor": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 98.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 84.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 127.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 72.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 51.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 127.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 122.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 158.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 135.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 127.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 40.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 2.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 39.45
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 53.54
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 43.14
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 42.75
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 50.5
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 51.98
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 53.32
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 47.44
+        }
+      ]
+    },
+    "garden_tools": {
+      "history": [
+        {
+          "week": "2018-06-05",
+          "units": 51.0
+        },
+        {
+          "week": "2018-06-12",
+          "units": 34.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 41.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 67.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 28.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 29.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 42.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 50.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 51.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 42.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 37.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 16.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-08-28",
+          "predicted_units": 30.92
+        },
+        {
+          "week": "2018-09-04",
+          "predicted_units": 40.72
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 40.36
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 35.81
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 36.73
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 46.14
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 46.17
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 50.05
+        }
+      ]
+    },
+    "health_beauty": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 227.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 220.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 182.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 184.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 161.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 215.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 161.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 259.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 246.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 234.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 118.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 14.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 78.31
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 100.32
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 80.26
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 58.67
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 76.21
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 64.6
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 64.8
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 59.82
+        }
+      ]
+    },
+    "housewares": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 114.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 116.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 135.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 105.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 77.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 140.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 164.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 200.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 175.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 183.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 104.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 8.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 59.69
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 79.78
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 60.29
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 56.1
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 63.34
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 64.63
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 67.6
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 59.34
+        }
+      ]
+    },
+    "perfumery": {
+      "history": [
+        {
+          "week": "2018-06-05",
+          "units": 70.0
+        },
+        {
+          "week": "2018-06-12",
+          "units": 47.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 30.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 27.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 39.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 31.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 54.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 60.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 75.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 55.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 60.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 43.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-08-28",
+          "predicted_units": 50.13
+        },
+        {
+          "week": "2018-09-04",
+          "predicted_units": 53.34
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 55.91
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 53.9
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 55.0
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 58.83
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 60.19
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 60.12
+        }
+      ]
+    },
+    "sports_leisure": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 110.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 116.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 86.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 115.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 56.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 121.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 128.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 144.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 134.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 138.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 77.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 4.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 48.79
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 59.36
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 53.84
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 48.26
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 57.16
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 63.71
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 67.73
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 55.11
+        }
+      ]
+    },
+    "telephony": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 66.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 51.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 36.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 35.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 37.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 64.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 70.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 105.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 94.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 59.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 31.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 2.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 25.24
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 38.03
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 38.28
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 36.69
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 41.38
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 44.47
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 45.14
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 40.42
+        }
+      ]
+    },
+    "toys": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 51.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 34.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 44.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 35.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 24.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 39.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 43.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 53.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 40.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 48.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 26.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 1.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 18.76
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 32.37
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 36.59
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 36.34
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 39.4
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 42.11
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 43.77
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 33.83
+        }
+      ]
+    },
+    "watches_gifts": {
+      "history": [
+        {
+          "week": "2018-06-12",
+          "units": 134.0
+        },
+        {
+          "week": "2018-06-19",
+          "units": 113.0
+        },
+        {
+          "week": "2018-06-26",
+          "units": 100.0
+        },
+        {
+          "week": "2018-07-03",
+          "units": 84.0
+        },
+        {
+          "week": "2018-07-10",
+          "units": 127.0
+        },
+        {
+          "week": "2018-07-17",
+          "units": 145.0
+        },
+        {
+          "week": "2018-07-24",
+          "units": 114.0
+        },
+        {
+          "week": "2018-07-31",
+          "units": 167.0
+        },
+        {
+          "week": "2018-08-07",
+          "units": 116.0
+        },
+        {
+          "week": "2018-08-14",
+          "units": 106.0
+        },
+        {
+          "week": "2018-08-21",
+          "units": 51.0
+        },
+        {
+          "week": "2018-08-28",
+          "units": 3.0
+        }
+      ],
+      "forecast": [
+        {
+          "week": "2018-09-04",
+          "predicted_units": 19.34
+        },
+        {
+          "week": "2018-09-11",
+          "predicted_units": 32.13
+        },
+        {
+          "week": "2018-09-18",
+          "predicted_units": 44.9
+        },
+        {
+          "week": "2018-09-25",
+          "predicted_units": 41.85
+        },
+        {
+          "week": "2018-10-02",
+          "predicted_units": 45.53
+        },
+        {
+          "week": "2018-10-09",
+          "predicted_units": 49.28
+        },
+        {
+          "week": "2018-10-16",
+          "predicted_units": 53.31
+        },
+        {
+          "week": "2018-10-23",
+          "predicted_units": 46.56
+        }
+      ]
+    }
+  }
+}

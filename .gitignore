@@ -17,6 +17,8 @@ ml/data/processed/*
 !ml/data/processed/.gitkeep
 ml/models/*
 !ml/models/.gitkeep
+!ml/models/demand_forecast.json
+!ml/models/.gitkeep
 ml/notebooks/*
 !ml/notebooks/.gitkeep
 *.ipynb
