@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     # Smart search (Modül 2) — Google Generative Language API (Gemini free tier)
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-1.5-flash"
-    gemini_embedding_model: str = "text-embedding-004"
+    gemini_embedding_model: str = "gemini-embedding-001"
     gemini_api_version: str = "v1beta"
     gemini_timeout_seconds: float = 10.0
     embedding_dimensions: int = 768

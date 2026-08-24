@@ -23,7 +23,9 @@ def sanitize_search_query(query: str) -> str:
     return cleaned
 
 
-async def embed_text(text: str) -> list[float] | None:
+async def embed_text(
+    text: str, *, task_type: str = "RETRIEVAL_DOCUMENT"
+) -> list[float] | None:
     """Embed text via Google Generative Language API; returns None when unavailable or on failure."""
     if not settings.gemini_enabled:
         return None
@@ -37,6 +39,8 @@ async def embed_text(text: str) -> list[float] | None:
     payload = {
         "model": f"models/{settings.gemini_embedding_model}",
         "content": {"parts": [{"text": text}]},
+        "task_type": task_type,
+        "output_dimensionality": settings.embedding_dimensions,
     }
 
     try:
@@ -63,7 +67,7 @@ async def refresh_product_embedding(product: Product) -> None:
         return
 
     text = build_product_embedding_text(product)
-    embedding = await embed_text(text)
+    embedding = await embed_text(text, task_type="RETRIEVAL_DOCUMENT")
     if embedding is None:
         return
 

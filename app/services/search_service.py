@@ -114,7 +114,7 @@ async def smart_search(query: str, top_k: int | None = None) -> SearchResponse:
     limit = top_k or settings.search_top_k
 
     expanded_query = await expand_search_query(query) or query
-    query_vector = await embed_text(expanded_query)
+    query_vector = await embed_text(expanded_query, task_type="RETRIEVAL_QUERY")
     if query_vector is not None:
         semantic_hits: list[tuple[Product, float]] = []
         try:
