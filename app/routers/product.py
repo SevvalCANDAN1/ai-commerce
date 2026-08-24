@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.security import get_current_store_admin
 from app.core.storefront import is_storefront_visible, storefront_filters
-from app.models.product import Product
+from app.models.product import Product, Variant
 from app.models.user import User
 from app.schemas.product import (
     ProductCreateRequest,
