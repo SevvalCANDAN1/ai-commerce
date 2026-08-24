@@ -72,7 +72,10 @@ async def validate_refresh_token(refresh_token: str) -> User:
     if stored_token is None:
         raise credentials_exception
 
-    if stored_token.expires_at <= datetime.now(timezone.utc):
+    expires_at = stored_token.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at <= datetime.now(timezone.utc):
         stored_token.revoked = True
         await stored_token.save()
         raise credentials_exception

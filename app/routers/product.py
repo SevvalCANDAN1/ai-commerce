@@ -118,7 +118,8 @@ async def update_product(
         )
 
     if "variants" in update_data:
-        update_data["total_stock"] = calculate_total_stock(update_data["variants"])
+        variants = [Variant(**v) for v in update_data["variants"]]
+        update_data["total_stock"] = calculate_total_stock(variants)
 
     for field, value in update_data.items():
         setattr(product, field, value)
