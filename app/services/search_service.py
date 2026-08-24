@@ -10,6 +10,7 @@ from app.models.product import Product
 from app.schemas.product import product_to_response
 from app.schemas.search import SearchResponse, SearchResultItem
 from app.services.embedding_service import embed_text
+from app.services.intent_service import expand_search_query
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +113,8 @@ async def smart_search(query: str, top_k: int | None = None) -> SearchResponse:
     """
     limit = top_k or settings.search_top_k
 
-    query_vector = await embed_text(query)
+    expanded_query = await expand_search_query(query) or query
+    query_vector = await embed_text(expanded_query)
     if query_vector is not None:
         semantic_hits: list[tuple[Product, float]] = []
         try:

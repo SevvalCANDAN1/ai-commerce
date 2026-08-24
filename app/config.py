@@ -36,20 +36,20 @@ class Settings(BaseSettings):
     checkout_session_minutes: int = 15
     mock_payment_failure_rate: float = 0.20
 
-    # Smart search (Modül 2)
-    azure_openai_endpoint: str | None = None
-    azure_openai_api_key: str | None = None
-    azure_openai_embedding_deployment: str = "text-embedding-3-small"
-    azure_openai_api_version: str = "2024-02-01"
-    embedding_dimensions: int = 1536
+    # Smart search (Modül 2) — Google Generative Language API (Gemini free tier)
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-1.5-flash"
+    gemini_embedding_model: str = "text-embedding-004"
+    gemini_api_version: str = "v1beta"
+    gemini_timeout_seconds: float = 10.0
+    embedding_dimensions: int = 768
     search_top_k: int = 5
     search_vector_index_name: str = "product_vector_index"
-    azure_openai_timeout_seconds: float = 10.0
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def azure_openai_enabled(self) -> bool:
-        return bool(self.azure_openai_endpoint and self.azure_openai_api_key)
+    def gemini_enabled(self) -> bool:
+        return bool(self.gemini_api_key)
 
     @cached_property
     def mongodb_url(self) -> str:

@@ -55,6 +55,6 @@ async def health_check():
     return {
         "status": "ok",
         "service": "ai-commerce",
-        "azure_openai": settings.azure_openai_enabled,
+        "gemini": settings.gemini_enabled,
         "demand_forecast": forecast_ready(),
     }

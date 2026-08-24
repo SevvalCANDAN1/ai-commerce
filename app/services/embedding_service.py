@@ -24,27 +24,27 @@ def sanitize_search_query(query: str) -> str:
 
 
 async def embed_text(text: str) -> list[float] | None:
-    """Embed text via Azure OpenAI; returns None when unavailable or on failure."""
-    if not settings.azure_openai_enabled:
+    """Embed text via Google Generative Language API; returns None when unavailable or on failure."""
+    if not settings.gemini_enabled:
         return None
 
     url = (
-        f"{settings.azure_openai_endpoint.rstrip('/')}"
-        f"/openai/deployments/{settings.azure_openai_embedding_deployment}"
-        f"/embeddings?api-version={settings.azure_openai_api_version}"
+        f"https://generativelanguage.googleapis.com/"
+        f"{settings.gemini_api_version}/models/{settings.gemini_embedding_model}:embedContent"
+        f"?key={settings.gemini_api_key}"
     )
-    headers = {
-        "api-key": settings.azure_openai_api_key,
-        "Content-Type": "application/json",
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "model": f"models/{settings.gemini_embedding_model}",
+        "content": {"parts": [{"text": text}]},
     }
-    payload = {"input": text}
 
     try:
-        async with httpx.AsyncClient(timeout=settings.azure_openai_timeout_seconds) as client:
+        async with httpx.AsyncClient(timeout=settings.gemini_timeout_seconds) as client:
             response = await client.post(url, headers=headers, json=payload)
             response.raise_for_status()
             data = response.json()
-            embedding = data["data"][0]["embedding"]
+            embedding = data["embedding"]["values"]
             if len(embedding) != settings.embedding_dimensions:
                 logger.warning(
                     "Unexpected embedding size %s (expected %s)",
@@ -53,13 +53,13 @@ async def embed_text(text: str) -> list[float] | None:
                 )
             return embedding
     except Exception as exc:
-        logger.warning("Azure embedding request failed: %s", exc)
+        logger.warning("Google embedding request failed: %s", exc)
         return None
 
 
 async def refresh_product_embedding(product: Product) -> None:
-    """Generate and persist embedding for a product when Azure is configured."""
-    if not settings.azure_openai_enabled:
+    """Generate and persist embedding for a product when Gemini is configured."""
+    if not settings.gemini_enabled:
         return
 
     text = build_product_embedding_text(product)

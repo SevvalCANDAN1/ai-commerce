@@ -12,8 +12,8 @@ from app.services.embedding_service import refresh_product_embedding
 
 
 async def backfill() -> None:
-    if not settings.azure_openai_enabled:
-        print("Azure OpenAI is not configured. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY.")
+    if not settings.gemini_enabled:
+        print("Gemini is not configured. Set GEMINI_API_KEY.")
         sys.exit(1)
 
     client = AsyncMongoClient(settings.mongodb_url)
