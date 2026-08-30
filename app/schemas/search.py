@@ -26,8 +26,20 @@ class SearchResultItem(BaseModel):
     score: float | None = None
 
 
+class ParsedSearchIntent(BaseModel):
+    """Structured intent extracted from a free-text query (Modül 2.1)."""
+
+    rewritten_query: str
+    intent: str = "product_search"
+    keywords: list[str] = []
+    categories: list[str] = []
+    color: str | None = None
+    size: str | None = None
+
+
 class SearchResponse(BaseModel):
     query: str
+    intent: ParsedSearchIntent
     mode: Literal["semantic", "keyword"]
     results: list[SearchResultItem]
     total: int

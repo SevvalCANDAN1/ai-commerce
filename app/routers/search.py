@@ -15,7 +15,8 @@ async def search_products(request: SearchRequest):
     Natural-language product search (Modül 2).
 
     Accepts free-text queries like "hafta sonu kamp için sıcak tutacak ekipman".
-    Uses Azure embeddings + MongoDB vector search when available; falls back to keyword search.
+    Parses intent via Gemini, embeds the rewritten query, then scores with
+    MongoDB Atlas Vector Search (or local cosine). Falls back to keyword search.
     """
     return await smart_search(query=request.query, top_k=request.top_k)
 

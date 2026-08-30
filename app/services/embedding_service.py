@@ -5,6 +5,7 @@ import httpx
 
 from app.config import settings
 from app.models.product import Product
+from app.services.gemini_client import describe_http_error, gemini_headers, gemini_url
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +31,7 @@ async def embed_text(
     if not settings.gemini_enabled:
         return None
 
-    url = (
-        f"https://generativelanguage.googleapis.com/"
-        f"{settings.gemini_api_version}/models/{settings.gemini_embedding_model}:embedContent"
-        f"?key={settings.gemini_api_key}"
-    )
-    headers = {"Content-Type": "application/json"}
+    url = gemini_url(settings.gemini_embedding_model, "embedContent")
     payload = {
         "model": f"models/{settings.gemini_embedding_model}",
         "content": {"parts": [{"text": text}]},
@@ -45,7 +41,7 @@ async def embed_text(
 
     try:
         async with httpx.AsyncClient(timeout=settings.gemini_timeout_seconds) as client:
-            response = await client.post(url, headers=headers, json=payload)
+            response = await client.post(url, headers=gemini_headers(), json=payload)
             response.raise_for_status()
             data = response.json()
             embedding = data["embedding"]["values"]
@@ -57,7 +53,7 @@ async def embed_text(
                 )
             return embedding
     except Exception as exc:
-        logger.warning("Google embedding request failed: %s", exc)
+        logger.warning("Google embedding request failed: %s", describe_http_error(exc))
         return None
 
 

@@ -10,7 +10,8 @@
         "similarity": "cosine"
       },
       { "type": "filter", "path": "status" },
-      { "type": "filter", "path": "total_stock" }
+      { "type": "filter", "path": "total_stock" },
+      { "type": "filter", "path": "categories" }
     ]
   }
 }
