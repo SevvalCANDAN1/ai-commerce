@@ -138,6 +138,12 @@ async def create_checkout_preview(user: User, address_index: int, coupon_code: s
     return session
 
 
+def _as_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value
+
+
 async def get_checkout_session_for_user(session_id: str, user: User) -> CheckoutSession:
     try:
         object_id = ObjectId(session_id)
@@ -145,11 +151,12 @@ async def get_checkout_session_for_user(session_id: str, user: User) -> Checkout
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Checkout session not found") from exc
 
     session = await CheckoutSession.get(object_id)
+    expired = session is not None and _as_utc(session.expires_at) <= datetime.now(timezone.utc)
     if (
         session is None
         or session.user_id != user.id
         or session.consumed
-        or session.expires_at <= datetime.now(timezone.utc)
+        or expired
     ):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Checkout session not found")
     return session
@@ -164,9 +171,10 @@ def validate_status_transition(current: OrderStatus, new_status: OrderStatus) ->
         )
 
 
-async def _decrement_inventory(items: list[OrderItemSnapshot], session) -> None:
+async def _decrement_inventory(items: list[OrderItemSnapshot], session=None) -> None:
+    session_kw = {"session": session} if session is not None else {}
     for item in items:
-        product = await Product.get(ObjectId(item.product_id), session=session)
+        product = await Product.get(ObjectId(item.product_id), **session_kw)
         if product is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Product missing during fulfillment")
 
@@ -183,7 +191,55 @@ async def _decrement_inventory(items: list[OrderItemSnapshot], session) -> None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Variant missing during fulfillment")
 
         product.total_stock = sum(v.stock for v in product.variants)
-        await product.save(session=session)
+        await product.save(**session_kw)
+
+
+async def _fulfill_paid_order(
+    checkout_session: CheckoutSession,
+    payment_id: str,
+    session=None,
+) -> Order:
+    session_kw = {"session": session} if session is not None else {}
+    checkout_session.consumed = True
+    await checkout_session.save(**session_kw)
+
+    cart = await Cart.find_one(Cart.user_id == checkout_session.user_id, **session_kw)
+    if cart is not None:
+        cart.items = []
+        await cart.save(**session_kw)
+
+    await _decrement_inventory(checkout_session.items_snapshot, session=session)
+
+    reservations = await StockReservation.find(
+        StockReservation.checkout_session_id == checkout_session.id,
+        StockReservation.released == False,
+        **session_kw,
+    ).to_list()
+    for reservation in reservations:
+        reservation.released = True
+        await reservation.save(**session_kw)
+
+    now = datetime.now(timezone.utc)
+    order = Order(
+        order_number=generate_order_number(),
+        user_id=checkout_session.user_id,
+        items_snapshot=checkout_session.items_snapshot,
+        address_snapshot=checkout_session.address_snapshot,
+        pricing_snapshot=checkout_session.pricing_snapshot,
+        status=OrderStatus.CONFIRMED,
+        status_history=[
+            StatusHistoryEntry(
+                status=OrderStatus.CONFIRMED,
+                changed_at=now,
+                changed_by="system",
+                note="Payment captured",
+            )
+        ],
+        payment_id=payment_id,
+        coupon_code=checkout_session.coupon_code,
+    )
+    await order.insert(**session_kw)
+    return order
 
 
 async def finalize_paid_order(
@@ -191,52 +247,9 @@ async def finalize_paid_order(
     payment_id: str,
     mongo_client: AsyncMongoClient | None = None,
 ) -> Order:
-    client = mongo_client or get_mongo_client()
-    order: Order | None = None
-    async with await client.start_session() as session:
-        async with session.start_transaction():
-            checkout_session.consumed = True
-            await checkout_session.save(session=session)
-
-            cart = await Cart.find_one(Cart.user_id == checkout_session.user_id, session=session)
-            if cart is not None:
-                cart.items = []
-                await cart.save(session=session)
-
-            await _decrement_inventory(checkout_session.items_snapshot, session=session)
-
-            reservations = await StockReservation.find(
-                StockReservation.checkout_session_id == checkout_session.id,
-                StockReservation.released == False,
-                session=session,
-            ).to_list()
-            for reservation in reservations:
-                reservation.released = True
-                await reservation.save(session=session)
-
-            now = datetime.now(timezone.utc)
-            order = Order(
-                order_number=generate_order_number(),
-                user_id=checkout_session.user_id,
-                items_snapshot=checkout_session.items_snapshot,
-                address_snapshot=checkout_session.address_snapshot,
-                pricing_snapshot=checkout_session.pricing_snapshot,
-                status=OrderStatus.CONFIRMED,
-                status_history=[
-                    StatusHistoryEntry(
-                        status=OrderStatus.CONFIRMED,
-                        changed_at=now,
-                        changed_by="system",
-                        note="Payment captured",
-                    )
-                ],
-                payment_id=payment_id,
-                coupon_code=checkout_session.coupon_code,
-            )
-            await order.insert(session=session)
-
-    if order is None:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Order creation failed")
+    # Local docker mongo:7 is standalone; transactions need a replica set.
+    del mongo_client
+    order = await _fulfill_paid_order(checkout_session, payment_id)
 
     await publish(
         "order.created",
