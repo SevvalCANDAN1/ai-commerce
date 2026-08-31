@@ -123,7 +123,7 @@ async def seed(count: int = 50, with_embeddings: bool = True) -> None:
         )
         await product.insert()
 
-        if with_embeddings and settings.gemini_enabled:
+        if with_embeddings and settings.embeddings_enabled:
             await refresh_product_embedding(product)
 
         created += 1
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--no-embeddings",
         action="store_true",
-        help="Skip generating embeddings even if Gemini is configured",
+        help="Skip generating embeddings even if an embedding provider is configured",
     )
     args = parser.parse_args()
 

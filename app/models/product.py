@@ -35,7 +35,7 @@ class Product(Document):
     # Automatically calculated sum of all variant stocks
     total_stock: int = Field(default=0, ge=0)
 
-    # Modül 2: semantic search vector (768-dim from Google gemini-embedding-001)
+    # Modül 2: semantic search vector (768-dim; Azure OpenAI or Gemini)
     embedding: list[float] | None = None
 
     class Settings:

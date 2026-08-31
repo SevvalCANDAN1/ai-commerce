@@ -15,9 +15,14 @@ from app.services.embedding_service import refresh_product_embedding
 
 
 async def backfill(force: bool = False) -> None:
-    if not settings.gemini_enabled:
-        print("Gemini is not configured. Set GEMINI_API_KEY.")
+    if not settings.embeddings_enabled:
+        print(
+            "No embedding provider is configured. "
+            "Set AZURE_OPENAI_ENDPOINT + AZURE_OPENAI_API_KEY, or GEMINI_API_KEY."
+        )
         sys.exit(1)
+
+    print(f"Using embedding provider: {settings.active_embedding_provider}")
 
     client = AsyncMongoClient(settings.mongodb_url)
     await init_beanie(database=client[settings.mongo_database], document_models=[Product])

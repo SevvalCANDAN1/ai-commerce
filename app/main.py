@@ -56,6 +56,7 @@ async def health_check():
         "status": "ok",
         "service": "ai-commerce",
         "gemini": settings.gemini_enabled,
+        "embeddings": settings.active_embedding_provider,
         "demand_forecast": forecast_ready(),
         "late_delivery": True,
     }

@@ -9,4 +9,3 @@ ml/notebooks
 ml/src
 *.md
 debug_db.py
-scripts

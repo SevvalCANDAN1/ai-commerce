@@ -36,20 +36,58 @@ class Settings(BaseSettings):
     checkout_session_minutes: int = 15
     mock_payment_failure_rate: float = 0.20
 
-    # Smart search (Modül 2) — Google Generative Language API (Gemini free tier)
+    # Smart search (Modül 2)
+    # Embeddings: Azure OpenAI (project brief). Intent parsing can still use Gemini.
+    # auto = Azure when configured, else Gemini.
+    embedding_provider: str = "auto"
+    embedding_dimensions: int = 768
+    search_top_k: int = 5
+    search_vector_index_name: str = "product_vector_index"
+
+    azure_openai_endpoint: str | None = None
+    azure_openai_api_key: str | None = None
+    azure_openai_embedding_deployment: str = "text-embedding-3-small"
+    azure_openai_api_version: str = "2024-10-21"
+    azure_openai_timeout_seconds: float = 10.0
+
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-1.5-flash"
     gemini_embedding_model: str = "gemini-embedding-001"
     gemini_api_version: str = "v1beta"
     gemini_timeout_seconds: float = 10.0
-    embedding_dimensions: int = 768
-    search_top_k: int = 5
-    search_vector_index_name: str = "product_vector_index"
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def gemini_enabled(self) -> bool:
         return bool(self.gemini_api_key)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def azure_openai_enabled(self) -> bool:
+        return bool(
+            self.azure_openai_endpoint
+            and self.azure_openai_api_key
+            and self.azure_openai_embedding_deployment
+        )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def active_embedding_provider(self) -> str | None:
+        choice = (self.embedding_provider or "auto").strip().lower()
+        if choice == "azure":
+            return "azure" if self.azure_openai_enabled else None
+        if choice == "gemini":
+            return "gemini" if self.gemini_enabled else None
+        if self.azure_openai_enabled:
+            return "azure"
+        if self.gemini_enabled:
+            return "gemini"
+        return None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def embeddings_enabled(self) -> bool:
+        return self.active_embedding_provider is not None
 
     @cached_property
     def mongodb_url(self) -> str:

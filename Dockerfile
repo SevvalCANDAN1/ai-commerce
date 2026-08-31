@@ -9,6 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
+COPY scripts ./scripts
 COPY ml/models/demand_forecast.json ./ml/models/demand_forecast.json
 COPY ml/models/.gitkeep ./ml/models/.gitkeep
 
