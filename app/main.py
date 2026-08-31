@@ -57,4 +57,5 @@ async def health_check():
         "service": "ai-commerce",
         "gemini": settings.gemini_enabled,
         "demand_forecast": forecast_ready(),
+        "late_delivery": True,
     }

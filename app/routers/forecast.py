@@ -4,6 +4,7 @@ from app.core.security import get_current_store_admin
 from app.models.user import User
 from app.routers.product import get_product_or_404
 from app.schemas.forecast import CategoryForecastResponse, CategoryListResponse
+from app.schemas.late_delivery import LateDeliveryRequest, LateDeliveryResponse
 from app.services.forecast_service import (
     category_forecast,
     forecast_ready,
@@ -11,6 +12,7 @@ from app.services.forecast_service import (
     load_forecast_artifact,
     product_forecast,
 )
+from app.services.late_delivery_service import score_features, score_order
 
 router = APIRouter(
     prefix="/forecast",
@@ -67,4 +69,29 @@ async def get_product_forecast(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Product category is not in the demand model.",
+        )
+
+
+@router.post("/late-delivery", response_model=LateDeliveryResponse)
+async def predict_late_delivery(
+    request: LateDeliveryRequest,
+    _admin: User = Depends(get_current_store_admin),
+):
+    """Purchase-time late-delivery risk (B2B). Uses Olist-style features."""
+    return score_features(request)
+
+
+@router.post("/late-delivery/orders/{order_id}", response_model=LateDeliveryResponse)
+async def predict_late_delivery_for_order(
+    order_id: str,
+    estimated_days: int = Query(default=7, ge=1, le=60),
+    _admin: User = Depends(get_current_store_admin),
+):
+    """Score an existing store order by mapping its snapshot onto the same features."""
+    try:
+        return await score_order(order_id, estimated_days=estimated_days)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found",
         )
